@@ -1,0 +1,435 @@
+import javax.swing.*;
+import javax.swing.border.Border;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+public class QuickBookingUI extends JPanel {
+
+    private MainForm parentFrame; // 引用主視窗，用於切換面板
+    private JPanel moviesPanel; // 用於存放電影海報的面板
+    private CardLayout moviesCardLayout; // 管理電影海報顯示的 CardLayout
+
+    // 直接儲存從 JSON 載入的 MovieDetail 物件
+    private List<Movie> allMovies = new ArrayList<>();
+    // 現正熱映和即將上映的電影現在是從 allMovies 中篩選出來的
+    private List<Movie> nowPlayingMovies = new ArrayList<>();
+    private List<Movie> upcomingMovies = new ArrayList<>();
+
+    public QuickBookingUI(MainForm parentFrame) {
+        this.parentFrame = parentFrame;
+        setLayout(new BorderLayout(10, 10)); // 整個面板的佈局
+        setBackground(new Color(0x95B0D0)); // 背景色
+
+        // ====== 新增：從 JSON 檔案載入電影數據 ======
+        loadMoviesFromJson("movies.json");
+
+        // 這裡將所有電影都放入現正熱映
+        nowPlayingMovies.addAll(allMovies);
+        
+        // 上方按鈕面板
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10)); // 左對齊，間距10
+        buttonPanel.setBackground(new Color(0x95B0D0));
+
+        JToggleButton nowPlayingButton = new JToggleButton("現正熱映");
+        JToggleButton upcomingButton = new JToggleButton("即將上映");
+
+        // 將按鈕加入按鈕組，實現互斥選擇
+        ButtonGroup movieStatusGroup = new ButtonGroup();
+        movieStatusGroup.add(nowPlayingButton);
+        movieStatusGroup.add(upcomingButton);
+
+        // 設定按鈕樣式
+        Font buttonFont = new Font("Microsoft JhengHei", Font.PLAIN, 16);
+        nowPlayingButton.setFont(buttonFont);
+        upcomingButton.setFont(buttonFont);
+        nowPlayingButton.setPreferredSize(new Dimension(120, 35));
+        upcomingButton.setPreferredSize(new Dimension(120, 35));
+
+        // 設定按鈕的選中和未選中狀態的顏色 (可選)
+        // Default color for unselected
+        nowPlayingButton.setBackground(UIManager.getColor("Button.background"));
+        upcomingButton.setBackground(UIManager.getColor("Button.background"));
+
+        // Selected color
+        Color selectedColor = new Color(0xC0C0C0); // 淺灰色
+        nowPlayingButton.addActionListener(e -> {
+            if (nowPlayingButton.isSelected()) {
+                nowPlayingButton.setBackground(selectedColor);
+                upcomingButton.setBackground(UIManager.getColor("Button.background"));
+                showMovies("NowPlaying");
+            }
+        });
+        upcomingButton.addActionListener(e -> {
+            if (upcomingButton.isSelected()) {
+                upcomingButton.setBackground(selectedColor);
+                nowPlayingButton.setBackground(UIManager.getColor("Button.background"));
+                showMovies("Upcoming");
+            }
+        });
+
+        buttonPanel.add(nowPlayingButton);
+        buttonPanel.add(upcomingButton);
+
+        add(buttonPanel, BorderLayout.NORTH);
+
+        // 電影海報顯示區域
+        moviesCardLayout = new CardLayout();
+        moviesPanel = new JPanel(moviesCardLayout);
+        moviesPanel.setBackground(new Color(0x95B0D0)); // 背景色
+
+        // 創建「現正熱映」面板
+        JPanel nowPlayingPanel = createMovieGridPanel(nowPlayingMovies);
+        moviesPanel.add(nowPlayingPanel, "NowPlaying");
+
+        // 創建「即將上映」面板
+        JPanel upcomingPanel = createMovieGridPanel(upcomingMovies);
+        moviesPanel.add(upcomingPanel, "Upcoming");
+
+        add(moviesPanel, BorderLayout.CENTER);
+
+        // 預設顯示「現正熱映」
+        nowPlayingButton.setSelected(true); // 設定預設選中
+        nowPlayingButton.setBackground(selectedColor); // 更新背景色
+        showMovies("NowPlaying");
+    }
+
+    // ====== 新增方法：從 JSON 檔案載入電影數據 ======
+    private void loadMoviesFromJson(String filePath) {
+        ObjectMapper mapper = new ObjectMapper();
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(filePath)) {
+            if (is == null) {
+                System.err.println("JSON file not found: " + filePath);
+                JOptionPane.showMessageDialog(this, "電影數據檔案未找到: " + filePath, "錯誤", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            // 讀取 JSON 陣列並映射到 List<MovieDetail>
+            allMovies = mapper.readValue(is, new TypeReference<List<Movie>>() {});
+            System.out.println("成功載入 " + allMovies.size() + " 部電影。");
+
+        } catch (IOException e) {
+            System.err.println("Error reading JSON file: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "讀取電影數據檔案時發生錯誤: " + e.getMessage(), "錯誤", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
+    // 輔助方法：創建電影海報網格面板
+    private JPanel createMovieGridPanel(List<Movie> movieDetails) {
+        // 使用 GridLayout 或 FlowLayout 根據實際需要調整
+        // 這裡我使用 GridLayout 讓海報排列整齊，並可以擴展到多行
+        // 假設每行最多5張海報
+        int rows = (movieDetails.size() + 4) / 5; // 計算行數，至少1行
+        if (rows == 0) rows = 1; // 至少顯示1行，即使沒有電影
+
+        JPanel gridPanel = new JPanel(new GridLayout(rows, 5, 20, 20)); // 行, 列, 水平間距, 垂直間距
+        gridPanel.setBackground(new Color(0x95B0D0));
+        gridPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20)); // 內邊距
+
+        for (Movie movie : movieDetails) {
+            // 創建可點擊的海報 JLabel
+            JLabel posterLabel = new JLabel();
+            posterLabel.setPreferredSize(new Dimension(120, 180)); // 設定海報大小
+            posterLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY)); // 邊框，模擬PictureBox
+
+            // 載入圖片並縮放
+            try {
+                // 使用 getClass().getClassLoader().getResource() 來載入資源目錄下的圖片
+                // 假設 movie.getImagePath() 返回的是 "images/movie1.jpg" 這樣的路徑
+                URL imageUrl = getClass().getClassLoader().getResource(movie.getImagePath());
+                if (imageUrl != null) {
+                    ImageIcon originalIcon = new ImageIcon(imageUrl);
+                    Image image = originalIcon.getImage();
+                    Image scaledImage = image.getScaledInstance(120, 180, Image.SCALE_SMOOTH);
+                    posterLabel.setIcon(new ImageIcon(scaledImage));
+                } else {
+                    System.err.println("Image not found: " + movie.getImagePath());
+                    posterLabel.setText(movie.getTitle()); // 顯示電影名稱作為備用文字
+                    posterLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+                    posterLabel.setVerticalTextPosition(SwingConstants.CENTER);
+                }
+            } catch (Exception e) {
+                System.err.println("Error loading image for movie " + movie.getTitle() + " at path: " + movie.getImagePath() + " - " + e.getMessage());
+                posterLabel.setText(movie.getTitle()); // 顯示電影名稱作為備用文字
+                posterLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+                posterLabel.setVerticalTextPosition(SwingConstants.CENTER);
+            }
+
+            posterLabel.setCursor(new Cursor(Cursor.HAND_CURSOR)); // 鼠標懸停時顯示手型
+
+            // 添加點擊事件監聽器
+            //final String movieId = movie.getId(); // 確保在匿名內部類中使用 final 或 effectively final
+            final String movieTitle = movie.getTitle();
+            final int movieruntime = movie.getRuntime();
+            final String movieIntro = movie.getIntroduction();
+            final String movieRating = movie.getRating();
+
+            posterLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    JOptionPane.showMessageDialog(QuickBookingUI.this,
+                            "電影名稱: " + movieTitle + "\n" 
+                            + "片長: " + movieruntime + "\n"
+                            + "簡介: " + movieIntro + "\n"
+                            + "分級: " + movieRating,
+                            "電影資訊",
+                            JOptionPane.INFORMATION_MESSAGE);
+
+                    parentFrame.showPanel("Booking");
+                    // 這裡可以切換到電影詳細資訊頁面
+                    // parentFrame.showPanel("MovieDetail_" + movie.movieId); // 假設有 MovieDetailUI 接收電影ID
+                    // 如果沒有 MovieDetailUI 實例，您可以創建一個
+                    // parentFrame.showPanel("MovieDetail"); // 切換到一個通用的電影詳細頁面
+                    
+                    // 為了演示，我們假設點擊後會進入一個簡單的電影詳細頁面
+                    // 您需要創建一個 MovieDetailUI 類別，並將其添加到 MovieTicketSystemUI 的 cardPanel 中
+                    // 例如：parentFrame.showPanel("MovieDetail");
+                    // 並且 MovieDetailUI 需要能接收電影ID來顯示相應的資訊
+                    // 例如：parentFrame.showMovieDetailPanel(movie.movieId);
+                    // 這裡我們就直接彈出訊息框了，因為還沒有 MovieDetailUI
+                }
+            });
+            gridPanel.add(posterLabel);
+        }
+
+        // 如果電影數量不足 10 個，補齊空白佔位符 (可選，讓佈局看起來更整齊)
+        // 圖片中看起來似乎不足 10 個，但為了滿足您的需求，我們可以這樣處理
+        int emptySlots = (rows * 5) - movieDetails.size();
+        for (int i = 0; i < emptySlots; i++) {
+            JPanel emptyPanel = new JPanel();
+            emptyPanel.setBackground(new Color(0x95B0D0)); // 與背景色一致
+            gridPanel.add(emptyPanel);
+        }
+        
+        return gridPanel;
+    }
+
+    // 輔助方法：切換電影海報顯示 (現正熱映或即將上映)
+    private void showMovies(String type) {
+        moviesCardLayout.show(moviesPanel, type);
+    }
+}aimport javax.swing.*;
+import javax.swing.border.Border;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+public class QuickBookingUI extends JPanel {
+
+    private MainForm parentFrame; // 引用主視窗，用於切換面板
+    private JPanel moviesPanel; // 用於存放電影海報的面板
+    private CardLayout moviesCardLayout; // 管理電影海報顯示的 CardLayout
+
+    // 直接儲存從 JSON 載入的 MovieDetail 物件
+    private List<Movie> allMovies = new ArrayList<>();
+    private List<Movie> nowPlayingMovies = new ArrayList<>();
+    private List<Movie> upcomingMovies = new ArrayList<>();
+
+    public QuickBookingUI(MainForm parentFrame) {
+        this.parentFrame = parentFrame;
+        setLayout(new BorderLayout(10, 10));
+        setBackground(new Color(0x95B0D0));
+
+        // ====== 新增：從 JSON 檔案載入電影數據 ======
+        loadMoviesFromJson("movies.json");
+        nowPlayingMovies.addAll(allMovies);
+
+        // 上方按鈕面板
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        buttonPanel.setBackground(new Color(0x95B0D0));
+
+        JToggleButton nowPlayingButton = new JToggleButton("現正熱映");
+        JToggleButton upcomingButton = new JToggleButton("即將上映");
+
+        // 將按鈕加入按鈕組，實現互斥選擇
+        ButtonGroup movieStatusGroup = new ButtonGroup();
+        movieStatusGroup.add(nowPlayingButton);
+        movieStatusGroup.add(upcomingButton);
+
+        // 設定按鈕樣式
+        Font buttonFont = new Font("Microsoft JhengHei", Font.PLAIN, 16);
+        nowPlayingButton.setFont(buttonFont);
+        upcomingButton.setFont(buttonFont);
+        nowPlayingButton.setPreferredSize(new Dimension(120, 35));
+        upcomingButton.setPreferredSize(new Dimension(120, 35));
+
+        // 設定按鈕的選中和未選中狀態的顏色 (可選)
+        // Default color for unselected
+        nowPlayingButton.setBackground(UIManager.getColor("Button.background"));
+        upcomingButton.setBackground(UIManager.getColor("Button.background"));
+
+        // Selected color
+        Color selectedColor = new Color(0xC0C0C0);
+        nowPlayingButton.addActionListener(e -> {
+            if (nowPlayingButton.isSelected()) {
+                nowPlayingButton.setBackground(selectedColor);
+                upcomingButton.setBackground(UIManager.getColor("Button.background"));
+                showMovies("NowPlaying");
+            }
+        });
+        upcomingButton.addActionListener(e -> {
+            if (upcomingButton.isSelected()) {
+                upcomingButton.setBackground(selectedColor);
+                nowPlayingButton.setBackground(UIManager.getColor("Button.background"));
+                showMovies("Upcoming");
+            }
+        });
+        buttonPanel.add(nowPlayingButton);
+        buttonPanel.add(upcomingButton);
+
+        add(buttonPanel, BorderLayout.NORTH);
+
+        // 電影海報顯示區域
+        moviesCardLayout = new CardLayout();
+        moviesPanel = new JPanel(moviesCardLayout);
+        moviesPanel.setBackground(new Color(0x95B0D0));
+
+        // 創建「現正熱映」面板
+        JPanel nowPlayingPanel = createMovieGridPanel(nowPlayingMovies);
+        moviesPanel.add(nowPlayingPanel, "NowPlaying");
+
+        // 創建「即將上映」面板
+        JPanel upcomingPanel = createMovieGridPanel(upcomingMovies);
+        moviesPanel.add(upcomingPanel, "Upcoming");
+
+        add(moviesPanel, BorderLayout.CENTER);
+        // 預設顯示「現正熱映」
+        nowPlayingButton.setSelected(true);
+        nowPlayingButton.setBackground(selectedColor);
+        showMovies("NowPlaying");
+    }
+
+    // ====== 新增方法：從 JSON 檔案載入電影數據 ======
+    private void loadMoviesFromJson(String filePath) {
+        ObjectMapper mapper = new ObjectMapper();
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(filePath)) {
+            if (is == null) {
+                System.err.println("JSON file not found: " + filePath);
+                JOptionPane.showMessageDialog(this, "電影數據檔案未找到: " + filePath, "錯誤", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            // 讀取 JSON 陣列並映射到 List<Movie>
+            allMovies = mapper.readValue(is, new TypeReference<List<Movie>>() {});
+            System.out.println("成功載入 " + allMovies.size() + " 部電影。");
+
+        } catch (IOException e) {
+            System.err.println("Error reading JSON file: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "讀取電影數據檔案時發生錯誤: " + e.getMessage(), "錯誤", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
+    // 輔助方法：創建電影海報網格面板
+    private JPanel createMovieGridPanel(List<Movie> movieDetails) {
+        // 使用 GridLayout 或 FlowLayout 根據實際需要調整
+        // 這裡我使用 GridLayout 讓海報排列整齊，並可以擴展到多行
+        // 假設每行最多5張海報
+        int rows = (movieDetails.size() + 4) / 5;
+        if (rows == 0) rows = 1;
+
+        JPanel gridPanel = new JPanel(new GridLayout(rows, 5, 20, 20));
+        gridPanel.setBackground(new Color(0x95B0D0));
+        gridPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+
+        for (Movie movie : movieDetails) {
+            // 創建可點擊的海報 JLabel
+            JLabel posterLabel = new JLabel();
+            posterLabel.setPreferredSize(new Dimension(120, 180));
+            posterLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+            // 載入圖片並縮放
+            try {
+                // 使用 getClass().getClassLoader().getResource() 來載入資源目錄下的圖片
+                // 假設 movie.getImagePath() 返回的是 "images/movie1.jpg" 這樣的路徑
+                URL imageUrl = getClass().getClassLoader().getResource(movie.getImagePath());
+                if (imageUrl != null) {
+                    ImageIcon originalIcon = new ImageIcon(imageUrl);
+                    Image image = originalIcon.getImage();
+                    Image scaledImage = image.getScaledInstance(120, 180, Image.SCALE_SMOOTH);
+                    posterLabel.setIcon(new ImageIcon(scaledImage));
+                } else {
+                    System.err.println("Image not found: " + movie.getImagePath());
+                    posterLabel.setText(movie.getTitle()); // 顯示電影名稱作為備用文字
+                    posterLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+                    posterLabel.setVerticalTextPosition(SwingConstants.CENTER);
+                }
+            } catch (Exception e) {
+                System.err.println("Error loading image for movie " + movie.getTitle() + " at path: " + movie.getImagePath() + " - " + e.getMessage());
+                posterLabel.setText(movie.getTitle()); // 顯示電影名稱作為備用文字
+                posterLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+                posterLabel.setVerticalTextPosition(SwingConstants.CENTER);
+            }
+
+            posterLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            // 添加點擊事件監聽器
+            final String movieId = movie.getId();
+            // final String movieTitle = movie.getTitle(); // 這些行原本用於 JOptionPane，現在可以移除或註解掉
+            // final int movieruntime = movie.getRuntime();
+            // final String movieIntro = movie.getIntroduction();
+            // final String movieRating = movie.getRating();
+
+            posterLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    // 移除原有的 JOptionPane 彈出邏輯
+                    // JOptionPane.showMessageDialog(QuickBookingUI.this,
+                    //         "電影名稱: " + movieTitle + "\n"
+                    //                 + "片長: " + movieruntime + "\n"
+                    //                 + "簡介: " + movieIntro + "\n"
+                    //                 + "分級: " + movieRating,
+                    //         "電影資訊",
+                    //         JOptionPane.INFORMATION_MESSAGE);
+
+                    // 1. 切換到 BookingUI 面板
+                    parentFrame.showPanel("Booking");
+
+                    // 2. 獲取 MainForm 中 BookingUI 的實例，並載入電影資訊
+                    // 假設 MainForm 有一個方法來獲取 BookingUI 實例
+                    if (parentFrame.getBookingUI() != null) {
+                        parentFrame.getBookingUI().loadMovie(movieId);
+                    } else {
+                        System.err.println("Error: BookingUI instance not found in MainForm.");
+                    }
+                }
+            });
+            gridPanel.add(posterLabel);
+        }
+
+        // 如果電影數量不足 10 個，補齊空白佔位符 (可選，讓佈局看起來更整齊)
+        // 圖片中看起來似乎不足 10 個，但為了滿足您的需求，我們可以這樣處理
+        int emptySlots = (rows * 5) - movieDetails.size();
+        for (int i = 0; i < emptySlots; i++) {
+            JPanel emptyPanel = new JPanel();
+            emptyPanel.setBackground(new Color(0x95B0D0)); // 與背景色一致
+            gridPanel.add(emptyPanel);
+        }
+
+        return gridPanel;
+    }
+
+    // 輔助方法：切換電影海報顯示 (現正熱映或即將上映)
+    private void showMovies(String type) {
+        moviesCardLayout.show(moviesPanel, type);
+    }
+}

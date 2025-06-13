@@ -1,0 +1,577 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors; // For stream operations (用於處理集合的流操作)
+
+/**
+ * BookingUI 類別負責電影訂票介面的顯示和互動邏輯。
+ * 包含電影資訊顯示、廳別/日期/時間選擇、座位選擇以及訂票確認功能。
+ */
+public class BookingUI extends JPanel {
+
+    
+    // 參照主框架，以便在需要時切換面板
+    private MainForm parentFrame; 
+    // 當前選中的電影 ID
+    private String currentMovieId;
+
+    // --- 左側電影資訊區域的 UI 元件 ---
+    private JLabel movieNameLabel;        // 電影名稱
+    private JLabel movieDurationLabel;    // 電影片長
+    private JLabel movieGenreLabel;       // 電影類型 (可擴展，目前 JSON 無此欄位)
+    private JLabel movieRatingLabel;      // 電影分級
+    private JLabel movieActorsLabel;      // 電影演員
+    private JLabel movieDirectorLabel;    // 電影導演
+    private JTextArea movieSynopsisArea;   // 電影簡介 (使用 JTextArea 以支持多行文本)
+
+    // --- 中間選票區域的 UI 元件 ---
+    private ButtonGroup hallTypeGroup;    // 廳別按鈕組，確保單選
+    private ButtonGroup dateGroup;        // 日期按鈕組，確保單選
+    private ButtonGroup timeGroup;        // 時間按鈕組，確保單選
+    private JPanel hallTypeButtonsPanel;  // 存放廳別按鈕的面板
+    private JPanel dateButtonsPanel;      // 存放日期按鈕的面板
+    private JPanel timeButtonsPanel;      // 存放時間按鈕的面板
+
+    // --- 右側座位區域的 UI 元件 ---
+    private JPanel seatMapPanel;          // 存放座位按鈕的面板
+    private Map<String, JToggleButton> seatButtons; // 儲存座位按鈕的映射，鍵為座位號碼 (例如 "A1")
+    private List<String> selectedSeats;   // 儲存用戶已選擇的座位號碼列表
+
+    // --- 當前選中的訂票資訊 ---
+    private String selectedHallType = null;   // 當前選中的廳別
+    private String selectedDate = null;       // 當前選中的日期
+    private String selectedTime = null;       // 當前選中的時間
+    private String selectedShowtimeId = null; // 當前選中場次的 ID (用於更新 JSON 數據)
+
+    /**
+     * BookingUI 的建構子。
+     * 初始化介面佈局和所有 UI 元件。
+     * @param parentFrame 主應用程式的 JFrame 實例，用於面板切換。
+     */
+    public BookingUI(MainForm parentFrame) {
+        this.parentFrame = parentFrame;
+        // 設定面板佈局為 BorderLayout，並設定水平和垂直間距
+        setLayout(new BorderLayout(20, 10)); 
+        // 設定背景顏色 (柔和的藍色)
+        setBackground(new Color(0x95B0D0)); 
+        // 設定面板內邊距
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); 
+
+        // 初始化已選座位列表
+        selectedSeats = new ArrayList<>();
+
+        // --- 1. 左側：電影詳細資訊面板的建立與配置 ---
+        JPanel movieDetailPanel = new JPanel();
+        movieDetailPanel.setLayout(new GridBagLayout()); // 使用 GridBagLayout 實現靈活的元件定位
+        movieDetailPanel.setBackground(new Color(0x95B0D0));
+        movieDetailPanel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.BLACK), "電影資訊", // 標題邊框
+                0, 0, new Font("Microsoft JhengHei", Font.BOLD, 18))); // 字體設定
+
+        // 定義標籤和數值的字體
+        Font labelFont = new Font("Microsoft JhengHei", Font.BOLD, 16);
+        Font valueFont = new Font("Microsoft JhengHei", Font.PLAIN, 16);
+
+        // 使用 GridBagConstraints 輔助定位元件
+        int row = 0; // 行計數器
+        // 每一對 JLabel 和對應的值 (例如：電影名稱: [實際名稱])
+        movieDetailPanel.add(new JLabel("電影名稱:"), getGBC(0, row, labelFont)); 
+        movieNameLabel = new JLabel(); 
+        movieNameLabel.setFont(valueFont); 
+        movieDetailPanel.add(movieNameLabel, getGBC(1, row++, valueFont)); // GBC: (1, row), 然後 row+1
+
+        movieDetailPanel.add(new JLabel("片長:"), getGBC(0, row, labelFont)); 
+        movieDurationLabel = new JLabel(); 
+        movieDurationLabel.setFont(valueFont); 
+        movieDetailPanel.add(movieDurationLabel, getGBC(1, row++, valueFont));
+
+        movieDetailPanel.add(new JLabel("類型:"), getGBC(0, row, labelFont)); 
+        movieGenreLabel = new JLabel(); 
+        movieGenreLabel.setFont(valueFont); 
+        movieDetailPanel.add(movieGenreLabel, getGBC(1, row++, valueFont));
+
+        movieDetailPanel.add(new JLabel("分級:"), getGBC(0, row, labelFont)); 
+        movieRatingLabel = new JLabel(); 
+        movieRatingLabel.setFont(valueFont); 
+        movieDetailPanel.add(movieRatingLabel, getGBC(1, row++, valueFont));
+
+        movieDetailPanel.add(new JLabel("演員:"), getGBC(0, row, labelFont)); 
+        movieActorsLabel = new JLabel(); 
+        movieActorsLabel.setFont(valueFont); 
+        movieDetailPanel.add(movieActorsLabel, getGBC(1, row++, valueFont));
+
+        movieDetailPanel.add(new JLabel("導演:"), getGBC(0, row, labelFont)); 
+        movieDirectorLabel = new JLabel(); 
+        movieDirectorLabel.setFont(valueFont); 
+        movieDetailPanel.add(movieDirectorLabel, getGBC(1, row++, valueFont));
+
+        // 電影簡介 (使用 JTextArea 搭配 JScrollPane)
+        JLabel synopsisTitle = new JLabel("簡介:");
+        synopsisTitle.setFont(labelFont);
+        GridBagConstraints gbcSynopsis = new GridBagConstraints();
+        gbcSynopsis.gridx = 0;
+        gbcSynopsis.gridy = row;
+        gbcSynopsis.gridwidth = 2; // 跨越兩列
+        gbcSynopsis.anchor = GridBagConstraints.WEST;
+        gbcSynopsis.insets = new Insets(5, 5, 5, 5);
+        movieDetailPanel.add(synopsisTitle, gbcSynopsis);
+        row++;
+
+        movieSynopsisArea = new JTextArea(5, 20); // 5行20列
+        movieSynopsisArea.setFont(valueFont);
+        movieSynopsisArea.setLineWrap(true);       // 自動換行
+        movieSynopsisArea.setWrapStyleWord(true); // 在單詞邊界換行
+        movieSynopsisArea.setEditable(false);      // 不可編輯
+        movieSynopsisArea.setBackground(new Color(0x95B0D0));
+        JScrollPane synopsisScrollPane = new JScrollPane(movieSynopsisArea); // 為 JTextArea 添加滾動條
+        synopsisScrollPane.setBorder(BorderFactory.createEmptyBorder()); // 移除滾動條邊框
+        synopsisScrollPane.setBackground(new Color(0x95B0D0));
+
+        gbcSynopsis.gridx = 0;
+        gbcSynopsis.gridy = row;
+        gbcSynopsis.gridwidth = 2;
+        gbcSynopsis.fill = GridBagConstraints.BOTH; // 填充可用空間
+        gbcSynopsis.weightx = 1.0; // 水平權重
+        gbcSynopsis.weighty = 1.0; // 垂直權重
+        movieDetailPanel.add(synopsisScrollPane, gbcSynopsis);
+
+        // 將電影詳細資訊面板添加到主面板的 WEST (左側)
+        add(movieDetailPanel, BorderLayout.WEST);
+
+        // --- 2. 中間：票種/日期/時間選擇面板的建立與配置 ---
+        JPanel selectionPanel = new JPanel();
+        selectionPanel.setLayout(new GridBagLayout()); // 依然使用 GridBagLayout 方便排版
+        selectionPanel.setBackground(new Color(0x95B0D0));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5); // 元件間距
+        gbc.anchor = GridBagConstraints.NORTHWEST; // 靠左上角對齊
+        gbc.fill = GridBagConstraints.HORIZONTAL; // 水平填充
+
+        Font buttonFont = new Font("Microsoft JhengHei", Font.PLAIN, 14);
+
+        // 廳別選擇面板
+        hallTypeButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5)); // 流式佈局，左對齊
+        hallTypeButtonsPanel.setBackground(new Color(0x95B0D0));
+        hallTypeGroup = new ButtonGroup(); // 廳別按鈕組
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        selectionPanel.add(hallTypeButtonsPanel, gbc);
+
+        // 日期選擇面板
+        dateButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        dateButtonsPanel.setBackground(new Color(0x95B0D0));
+        dateGroup = new ButtonGroup(); // 日期按鈕組
+        gbc.gridy = 1;
+        selectionPanel.add(dateButtonsPanel, gbc);
+
+        // 時間選擇面板
+        timeButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        timeButtonsPanel.setBackground(new Color(0x95B0D0));
+        timeGroup = new ButtonGroup(); // 時間按鈕組
+        gbc.gridy = 2;
+        selectionPanel.add(timeButtonsPanel, gbc);
+
+        // 將選擇面板添加到主面板的 CENTER (中間)
+        add(selectionPanel, BorderLayout.CENTER);
+
+
+        // --- 3. 右側：座位選擇區和螢幕提示面板的建立與配置 ---
+        JPanel seatBookingPanel = new JPanel(new BorderLayout(10, 10)); // 邊界佈局
+        seatBookingPanel.setBackground(new Color(0x95B0D0));
+        seatBookingPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0)); // 內邊距
+
+        // 螢幕提示標籤
+        JLabel screenLabel = new JLabel("螢幕", SwingConstants.CENTER); // 文本居中
+        screenLabel.setFont(new Font("Microsoft JhengHei", Font.BOLD, 24));
+        screenLabel.setBackground(Color.DARK_GRAY); // 背景色
+        screenLabel.setForeground(Color.WHITE);      // 字體色
+        screenLabel.setOpaque(true);                 // 確保背景色可見
+        screenLabel.setPreferredSize(new Dimension(seatBookingPanel.getWidth(), 50)); // 設定首選大小
+        seatBookingPanel.add(screenLabel, BorderLayout.NORTH); // 螢幕標籤在頂部
+
+        // 座位圖面板
+        seatMapPanel = new JPanel(new GridBagLayout()); // 使用 GridBagLayout 方便佈局座位
+        seatMapPanel.setBackground(new Color(0x95B0D0));
+        JScrollPane seatScrollPane = new JScrollPane(seatMapPanel); // 為座位圖添加滾動條 (防止座位過多溢出)
+        seatScrollPane.setBorder(null); // 移除邊框
+        seatScrollPane.getViewport().setBackground(new Color(0x95B0D0)); // 滾動條視圖的背景色
+        seatBookingPanel.add(seatScrollPane, BorderLayout.CENTER); // 座位圖在中間
+
+        // 確認按鈕
+        JButton confirmButton = new JButton("確認");
+        confirmButton.setFont(new Font("Microsoft JhengHei", Font.BOLD, 20));
+        confirmButton.setPreferredSize(new Dimension(150, 50));
+        // 為確認按鈕添加動作監聽器，點擊時調用 confirmBooking 方法
+        confirmButton.addActionListener(e -> confirmBooking()); 
+        
+        JPanel confirmButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // 居中佈局
+        confirmButtonPanel.setBackground(new Color(0x95B0D0));
+        confirmButtonPanel.add(confirmButton);
+        seatBookingPanel.add(confirmButtonPanel, BorderLayout.SOUTH); // 確認按鈕在底部
+
+        // 將整個座位預訂面板添加到主面板的 EAST (右側)
+        add(seatBookingPanel, BorderLayout.EAST);
+
+        // 初始狀態：日期和時間選擇按鈕禁用，座位圖清空
+        setEnabledForButtons(dateButtonsPanel, false);
+        setEnabledForButtons(timeButtonsPanel, false);
+        clearSeatMap();
+    }
+
+    /**
+     * 輔助方法：創建 GridBagConstraints 物件，簡化 GridBagLayout 的配置。
+     * @param x gridx
+     * @param y gridy
+     * @param font 元件字體
+     * @return 配置好的 GridBagConstraints
+     */
+    private GridBagConstraints getGBC(int x, int y, Font font) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = x;
+        gbc.gridy = y;
+        gbc.insets = new Insets(5, 5, 5, 5); // 內邊距
+        gbc.anchor = GridBagConstraints.WEST; // 西部對齊 (左對齊)
+        return gbc;
+    }
+
+    /**
+     * 載入指定電影的資訊到介面中。
+     * 當用戶在電影資訊頁面選擇一部電影時，會調用此方法。
+     * @param movieId 要載入的電影的 ID。
+     */
+    public void loadMovie(String movieId) {
+        this.currentMovieId = movieId;
+        // 清除之前的選擇狀態和UI顯示
+        selectedHallType = null;
+        selectedDate = null;
+        selectedTime = null;
+        selectedShowtimeId = null; 
+        selectedSeats.clear();
+        clearSeatMap(); // 清空座位圖
+        // 禁用日期和時間選擇按鈕
+        setEnabledForButtons(dateButtonsPanel, false); 
+        setEnabledForButtons(timeButtonsPanel, false);
+
+        // 從 JsonDataManager 獲取電影詳細資訊 [cite: 1]
+        Movie movie = JsonDataManager.getMovieById(movieId);
+        if (movie != null) {
+            // 更新左側電影資訊標籤
+            movieNameLabel.setText(movie.getTitle());
+            movieDurationLabel.setText(movie.getRuntime() + " 分鐘");
+            movieGenreLabel.setText("未知類型"); // JSON中目前無此欄位，可自行擴展
+            movieRatingLabel.setText(movie.getRating());
+            movieActorsLabel.setText(movie.getActors());
+            movieDirectorLabel.setText(movie.getDirector());
+            movieSynopsisArea.setText(movie.getIntroduction());
+
+            // 載入該電影可用的廳別按鈕 [cite: 1]
+            loadHallTypeButtons(JsonDataManager.getAvailableHallTypes(movieId));
+        } else {
+            // 如果找不到電影，顯示N/A
+            movieNameLabel.setText("N/A");
+            movieDurationLabel.setText("N/A");
+            movieGenreLabel.setText("N/A");
+            movieRatingLabel.setText("N/A");
+            movieActorsLabel.setText("N/A");
+            movieDirectorLabel.setText("N/A");
+            movieSynopsisArea.setText("找不到電影資訊。");
+            // 清空廳別按鈕面板
+            hallTypeButtonsPanel.removeAll();
+            hallTypeButtonsPanel.revalidate();
+            hallTypeButtonsPanel.repaint();
+        }
+    }
+
+    /**
+     * 根據提供的廳別列表，動態生成並載入廳別選擇按鈕。
+     * @param hallTypes 廳別名稱列表。
+     */
+    private void loadHallTypeButtons(List<String> hallTypes) {
+        hallTypeButtonsPanel.removeAll(); // 移除舊的按鈕
+        hallTypeGroup = new ButtonGroup(); // 重新建立按鈕組，確保單選
+
+        for (String hallType : hallTypes) {
+            JToggleButton button = createToggleButton(hallType); // 創建自定義樣式的切換按鈕
+            button.addActionListener(e -> {
+                selectedHallType = button.getText(); // 更新選中的廳別
+                // 清除後續選擇，重新載入
+                selectedDate = null;
+                selectedTime = null;
+                selectedShowtimeId = null;
+                selectedSeats.clear();
+                clearSeatMap();
+                // 載入日期按鈕 [cite: 1]
+                loadDateButtons(currentMovieId, selectedHallType);
+                // 啟用日期按鈕，禁用時間按鈕
+                setEnabledForButtons(dateButtonsPanel, true);
+                setEnabledForButtons(timeButtonsPanel, false);
+            });
+            hallTypeGroup.add(button); // 將按鈕加入按鈕組
+            hallTypeButtonsPanel.add(button); // 將按鈕加入面板
+        }
+        hallTypeButtonsPanel.revalidate(); // 重新驗證佈局
+        hallTypeButtonsPanel.repaint();   // 重新繪製
+    }
+
+    /**
+     * 根據電影ID和廳別，動態生成並載入日期選擇按鈕。
+     * @param movieId 電影 ID。
+     * @param hallType 廳別名稱。
+     */
+    private void loadDateButtons(String movieId, String hallType) {
+        dateButtonsPanel.removeAll();
+        dateGroup = new ButtonGroup();
+
+        // 從 JsonDataManager 獲取可用日期列表 [cite: 1]
+        List<String> dates = JsonDataManager.getAvailableDates(movieId, hallType);
+        for (String date : dates) {
+            JToggleButton button = createToggleButton(date);
+            button.addActionListener(e -> {
+                selectedDate = button.getText(); // 更新選中的日期
+                // 清除後續選擇，重新載入
+                selectedTime = null;
+                selectedShowtimeId = null;
+                selectedSeats.clear();
+                clearSeatMap();
+                // 載入時間按鈕 [cite: 1]
+                loadTimeButtons(currentMovieId, selectedHallType, selectedDate);
+                // 啟用時間按鈕
+                setEnabledForButtons(timeButtonsPanel, true);
+            });
+            dateGroup.add(button);
+            dateButtonsPanel.add(button);
+        }
+        dateButtonsPanel.revalidate();
+        dateButtonsPanel.repaint();
+    }
+
+    /**
+     * 根據電影ID、廳別和日期，動態生成並載入時間選擇按鈕。
+     * @param movieId 電影 ID。
+     * @param hallType 廳別名稱。
+     * @param date 日期。
+     */
+    private void loadTimeButtons(String movieId, String hallType, String date) {
+        timeButtonsPanel.removeAll();
+        timeGroup = new ButtonGroup();
+
+        // 從 JsonDataManager 獲取可用時間列表 [cite: 1]
+        List<String> times = JsonDataManager.getAvailableTimes(movieId, hallType, date);
+        for (String time : times) {
+            JToggleButton button = createToggleButton(time);
+            button.addActionListener(e -> {
+                selectedTime = button.getText(); // 更新選中的時間
+                // 獲取該場次的詳細資訊，包括座位狀態 [cite: 1]
+                Showtime showtime = JsonDataManager.getShowtimeDetails(currentMovieId, selectedHallType, selectedDate, selectedTime);
+                if (showtime != null) {
+                    selectedShowtimeId = showtime.getShowtimeId(); // 設置選中的場次 ID
+                    loadSeatMap(showtime); // 載入座位圖
+                    selectedSeats.clear(); // 清空已選座位
+                } else {
+                    clearSeatMap(); // 清空座位圖
+                    JOptionPane.showMessageDialog(this, "找不到該場次的詳細資訊。", "錯誤", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+            timeGroup.add(button);
+            timeButtonsPanel.add(button);
+        }
+        timeButtonsPanel.revalidate();
+        timeButtonsPanel.repaint();
+    }
+
+    /**
+     * 輔助方法：創建一個具有統一風格的 JToggleButton。
+     * @param text 按鈕文本
+     * @return 創建好的 JToggleButton
+     */
+    private JToggleButton createToggleButton(String text) {
+        JToggleButton button = new JToggleButton(text);
+        button.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 14));
+        button.setPreferredSize(new Dimension(90, 30));
+        button.setFocusPainted(false); // 移除焦點邊框
+
+        button.addActionListener(e -> {
+            // 點擊時改變按鈕背景色
+            if (button.isSelected()) {
+                button.setBackground(new Color(0xAACCFF)); // 選中時的顏色
+            } else {
+                button.setBackground(UIManager.getColor("ToggleButton.background")); // 未選中時的預設顏色
+            }
+        });
+        return button;
+    }
+    
+    /**
+     * 輔助方法：設定指定面板中所有 JToggleButton 的啟用狀態。
+     * @param panel 目標面板
+     * @param enabled 是否啟用
+     */
+    private void setEnabledForButtons(JPanel panel, boolean enabled) {
+        for (Component comp : panel.getComponents()) {
+            if (comp instanceof JToggleButton) {
+                ((JToggleButton) comp).setEnabled(enabled);
+            }
+        }
+    }
+
+    /**
+     * 根據場次詳細資訊載入座位圖。
+     * 顯示每個座位的佔用狀態，並添加選擇邏輯。
+     * @param showtime 包含座位資訊的 Showtime 物件。
+     */
+    private void loadSeatMap(Showtime showtime) {
+        clearSeatMap(); // 清空現有座位圖
+        seatButtons = new HashMap<>(); // 初始化座位按鈕映射
+
+        // 獲取場次的座位列表。如果為空，則生成預設座位。
+        List<Seat> seatsToDisplay = showtime.getSeats();
+        if (seatsToDisplay == null || seatsToDisplay.isEmpty()) {
+            // 這裡可以根據實際需求，為不同的廳別生成不同大小的座位圖
+            seatsToDisplay = JsonDataManager.generateSeats(5, 10); // 預設生成 5x10 的座位 [cite: 1]
+            System.out.println("警告: 場次 " + showtime.getShowtimeId() + " 沒有座位數據，已生成預設座位。");
+        }
+
+        // 找出座位圖的最大行和最大列，以便正確佈局
+        int maxRow = 0;
+        int maxCol = 0;
+        for (Seat seat : seatsToDisplay) {
+            char rowChar = seat.getNumber().charAt(0); // 座位號碼的第一個字元是行 (例如 'A')
+            int colNum = 0;
+            try {
+                colNum = Integer.parseInt(seat.getNumber().substring(1)); // 座位號碼的其餘部分是列 (例如 '1')
+            } catch (NumberFormatException e) {
+                System.err.println("無效的座位號碼格式: " + seat.getNumber());
+                continue; // 跳過無效座位
+            }
+            maxRow = Math.max(maxRow, rowChar - 'A' + 1); // 計算最大行數
+            maxCol = Math.max(maxCol, colNum); // 計算最大列數
+        }
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3); // 座位按鈕間距
+        gbc.fill = GridBagConstraints.BOTH; // 填充格子空間
+
+        // 添加列標籤 (數字 1, 2, 3...)
+        for (int col = 1; col <= maxCol; col++) {
+            JLabel colLabel = new JLabel(String.valueOf(col), SwingConstants.CENTER);
+            colLabel.setFont(new Font("Arial", Font.BOLD, 12));
+            gbc.gridx = col;
+            gbc.gridy = 0; // 第一行是列標籤
+            seatMapPanel.add(colLabel, gbc);
+        }
+
+        // 添加行標籤 (字母 A, B, C...) 和座位按鈕
+        for (int row = 0; row < maxRow; row++) {
+            char rowChar = (char) ('A' + row);
+            JLabel rowLabel = new JLabel(String.valueOf(rowChar), SwingConstants.CENTER);
+            rowLabel.setFont(new Font("Arial", Font.BOLD, 12));
+            gbc.gridx = 0; // 第一列是行標籤
+            gbc.gridy = row + 1; // 從第二行開始放置座位按鈕
+            seatMapPanel.add(rowLabel, gbc);
+
+            for (int col = 1; col <= maxCol; col++) {
+                String seatName = String.valueOf(rowChar) + col; // 組合座位號碼 (例如 "A1")
+                JToggleButton seatButton = new JToggleButton(String.valueOf(col)); // 按鈕上只顯示列號
+                seatButton.setFont(new Font("Arial", Font.PLAIN, 12));
+                seatButton.setPreferredSize(new Dimension(40, 30)); // 設定按鈕大小
+
+                // 查找當前座位的狀態
+                Seat currentSeat = seatsToDisplay.stream()
+                                                .filter(s -> s.getNumber().equals(seatName))
+                                                .findFirst()
+                                                .orElse(null);
+
+                if (currentSeat != null && currentSeat.isOccupied()) {
+                    // 已佔用座位：紅色背景，禁用
+                    seatButton.setBackground(Color.RED);
+                    seatButton.setEnabled(false);
+                } else {
+                    // 可選座位：淺灰色背景，添加點擊監聽器
+                    seatButton.setBackground(Color.LIGHT_GRAY);
+                    seatButton.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (seatButton.isSelected()) {
+                                seatButton.setBackground(Color.GREEN); // 選中時變綠色
+                                selectedSeats.add(seatName); // 加入已選列表
+                            } else {
+                                seatButton.setBackground(Color.LIGHT_GRAY); // 取消選中時恢復
+                                selectedSeats.remove(seatName); // 從已選列表中移除
+                            }
+                        }
+                    });
+                }
+                seatButtons.put(seatName, seatButton); // 將按鈕存入映射
+
+                gbc.gridx = col;
+                gbc.gridy = row + 1;
+                seatMapPanel.add(seatButton, gbc);
+            }
+        }
+        seatMapPanel.revalidate();
+        seatMapPanel.repaint();
+    }
+    
+    /**
+     * 清空座位圖面板，用於重新載入座位時。
+     */
+    private void clearSeatMap() {
+        seatMapPanel.removeAll();
+        seatMapPanel.revalidate();
+        seatMapPanel.repaint();
+    }
+
+    /**
+     * 處理用戶點擊「確認」按鈕的邏輯。
+     * 檢查選擇是否完整，並執行訂票操作（更新 JSON 數據）。
+     */
+    private void confirmBooking() {
+        // 檢查是否所有必要資訊都已選擇
+        if (selectedHallType == null || selectedDate == null || selectedTime == null) {
+            JOptionPane.showMessageDialog(this, "請選擇廳別、日期和時間！", "訂票錯誤", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (selectedSeats.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "請選擇至少一個座位！", "訂票錯誤", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        if (selectedShowtimeId == null) {
+             JOptionPane.showMessageDialog(this, "場次資訊不完整，請重新選擇！", "訂票錯誤", JOptionPane.WARNING_MESSAGE);
+             return;
+        }
+
+        // 構建確認訊息
+        String confirmMsg = String.format(
+                "您選擇了:\n電影: %s\n廳別: %s\n日期: %s\n時間: %s\n座位: %s\n\n確認訂票嗎？",
+                movieNameLabel.getText(), selectedHallType, selectedDate, selectedTime, String.join(", ", selectedSeats)
+        );
+
+        // 彈出確認對話框
+        int confirm = JOptionPane.showConfirmDialog(this, confirmMsg, "確認訂票", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // 調用 JsonDataManager 更新 JSON 檔案中的座位狀態 [cite: 1]
+            boolean success = JsonDataManager.updateSeatOccupancy(selectedShowtimeId, selectedSeats, true);
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, "訂票成功！您的訂單已提交。\n選擇的座位: " + String.join(", ", selectedSeats), "訂票成功", JOptionPane.INFORMATION_MESSAGE);
+                // 訂票成功後，刷新座位圖以顯示新佔用的座位
+                Showtime currentShowtime = JsonDataManager.getShowtimeDetails(currentMovieId, selectedHallType, selectedDate, selectedTime);
+                if (currentShowtime != null) {
+                    loadSeatMap(currentShowtime); // 重新載入座位圖
+                    selectedSeats.clear(); // 清空已選座位
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "訂票失敗，請重試！", "訂票錯誤", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+}

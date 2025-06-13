@@ -1,0 +1,243 @@
+[ {
+  "id" : "M001",
+  "title" : "雷霆特攻隊",
+  "runtime" : 126,
+  "introduction" : "故事講述新一代「黑寡婦」葉蓮娜組建了一支由漫威電影宇宙中多位邊緣或前反派角色組成的特別小隊，包括酷寒戰士、幽靈、模仿大師、紅色衛兵與被革職的美國隊長。他們在伯爵夫人瓦倫緹娜的引導下，展開一項未知但危險的任務。",
+  "rating" : "輔12+",
+  "imagePath" : "images/movie1.jpg",
+  "actors" : "史嘉蕾喬韓森, 佛蘿倫絲普伊",
+  "director" : "傑克施雷爾",
+  "hallTypes" : [ "Hall A", "Hall B" ],
+  "showtimes" : [ {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "10:00",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : "Hall B",
+    "date" : "2025/06/10",
+    "time" : "15:40",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "20:15",
+    "seats" : null
+  } ]
+}, {
+  "id" : "M002",
+  "title" : "會計師2",
+  "runtime" : 132,
+  "introduction" : "故事講述天才會計師克里斯汀·沃夫在一位舊識被殺後，循著對方留下的「去找會計師」訊息展開調查。為了查出真相，他找來多年未見、身手不凡的殺手弟弟布萊斯頓合作，並與財政部副局長瑪莉貝絲攜手調查。隨著真相逐漸揭露，他們成為一個冷血殺手組織的追殺目標。",
+  "rating" : "輔15+",
+  "imagePath" : "images/movie2.jpg",
+  "actors" : "班艾佛列克, 強柏恩瑟",
+  "director" : "蓋文歐康諾",
+  "hallTypes" : [ "Hall A", "Hall B" ],
+  "showtimes" : [ {
+    "showtimeId" : null,
+    "hallType" : "Hall B",
+    "date" : "2025/06/10",
+    "time" : "12:00",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "19:15",
+    "seats" : null
+  } ]
+}, {
+  "id" : "M003",
+  "title" : "取精急轉彎",
+  "runtime" : 80,
+  "introduction" : "青少年詹斯和麗莎第一次做愛。詹斯體內，精子西蒙展開「作戰」計畫，目標是使麗莎的卵子受精。這是一場只有一個贏家的冒險。",
+  "rating" : "輔15+",
+  "imagePath" : "images/movie3.jpg",
+  "actors" : "雅斯·肯尼",
+  "director" : "湯米·維爾柯拉",
+  "hallTypes" : [ "Hall A", "Hall B" ],
+  "showtimes" : [ {
+    "showtimeId" : null,
+    "hallType" : "Hall B",
+    "date" : "2025/06/10",
+    "time" : "12:00",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : "Hall B",
+    "date" : "2025/06/10",
+    "time" : "22:15",
+    "seats" : null
+  } ]
+}, {
+  "id" : "M004",
+  "title" : "有病才會喜歡你",
+  "runtime" : 111,
+  "introduction" : "故事講述問題少年葉子杰為了逃避退學，開始裝病鬧劇，想靠裝病混過學校生活。然而班上認真的學霸班長葉梓潔察覺異狀，展開「打假行動」，不斷拆穿他的把戲。兩人在互相鬥智的過程中逐漸了解彼此，也意外擦出愛的火花。",
+  "rating" : "普0+",
+  "imagePath" : "images/movie4.jpg",
+  "actors" : "詹懷雲, 江齊",
+  "director" : "許富翔",
+  "hallTypes" : [ "Hall A", "Hall B" ],
+  "showtimes" : [ {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "15:00",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "21:15",
+    "seats" : null
+  } ]
+}, {
+  "id" : "M005",
+  "title" : "罪人",
+  "runtime" : 137,
+  "introduction" : "故事講述一對雙胞胎兄弟回到家鄉，想擺脫過去、重新開始，卻發現一股邪惡力量正悄悄等待他們的歸來。隨著詭異現象接連發生，他們不得不面對被過去糾纏的恐懼。",
+  "rating" : "輔15+",
+  "imagePath" : "images/movie5.jpg",
+  "actors" : "麥可·B·喬丹",
+  "director" : "萊恩庫格勒",
+  "hallTypes" : [ "Hall A", "Hall B" ],
+  "showtimes" : [ {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "08:00",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "22:15",
+    "seats" : null
+  } ]
+}, {
+  "id" : "M006",
+  "title" : "MINECRAFT 麥塊電影",
+  "runtime" : 101,
+  "introduction" : "故事講述四位平凡的小人物意外穿越進Minecraft的方塊世界，為了回到現實，他們必須學會在這個充滿怪物與挑戰的世界中生存，並與專業玩家史蒂夫合作展開冒險。這場旅程不只考驗他們的勇氣，也激發了他們的創造力，成為回到現實世界所需的關鍵力量。",
+  "rating" : "護6+",
+  "imagePath" : "images/movie6.jpg",
+  "actors" : "傑森摩莫亞, 傑克布萊克",
+  "director" : "傑瑞海斯",
+  "hallTypes" : [ "Hall A", "Hall B" ],
+  "showtimes" : [ {
+    "showtimeId" : null,
+    "hallType" : null,
+    "date" : "2025/06/10",
+    "time" : "15:00",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : null,
+    "date" : "2025/06/10",
+    "time" : "08:30",
+    "seats" : null
+  } ]
+}, {
+  "id" : "M007",
+  "title" : "不可能的任務：最終清算",
+  "runtime" : 169,
+  "introduction" : "伊森韓特（湯姆克魯斯 飾）再度出任務，這次他不只要面對過去的陰影，還將做出攸關全人類命運的關鍵選擇。\n伴隨著全新與原班人馬，伊森展開一場高風險的終極行動，挑戰前所未有的危機與背叛。全片融合飛車追逐、高空特技、水下潛行等驚險場面，帶來系列最震撼的動作體驗。",
+  "rating" : "輔15+",
+  "imagePath" : "images/movie7.jpg",
+  "actors" : "湯姆克魯斯",
+  "director" : "克里斯多夫麥奎瑞",
+  "hallTypes" : [ "Hall A", "Hall B" ],
+  "showtimes" : [ {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "14:20",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : "Hall B",
+    "date" : "2025/06/10",
+    "time" : "22:15",
+    "seats" : null
+  } ]
+}, {
+  "id" : "M008",
+  "title" : "所以親親會消失對不對",
+  "runtime" : 105,
+  "introduction" : "浪漫喜劇講述了活潑女孩莎麗（張金珠 飾），因為親吻對象會離奇消失，深信自己被詛咒，決定一輩子單身。直到古怪房東喬洛（保羅艾夫利諾 飾）闖入生活，並不顧詛咒展開追求，\n莎麗內心逐漸動搖，但也害怕歷史重演。兩人在曖昧與試探中逐步靠近，展開一段甜中帶酸的命運愛戀。",
+  "rating" : "護6+",
+  "imagePath" : "images/movie8.jpg",
+  "actors" : "張金珠, 保羅艾夫利諾",
+  "director" : "查德維丹斯",
+  "hallTypes" : [ "Hall A", "Hall B" ],
+  "showtimes" : [ {
+    "showtimeId" : null,
+    "hallType" : "Hall B",
+    "date" : "2025/06/10",
+    "time" : "11:00",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "19:15",
+    "seats" : null
+  } ]
+}, {
+  "id" : "M009",
+  "title" : "奧德蓋任務",
+  "runtime" : 93,
+  "introduction" : "這部動作喜劇講述資深殺手丹尼到了退休年齡，卻堅信自己依然身手不凡。當他終於等到新任務，卻發現竟是要他指導年輕又不靠譜的Z世代菜鳥殺手威爾伯。\n這對個性迥異的搭檔被迫聯手對抗一個犯罪集團，在磨合過程中衝突不斷，卻也逐漸建立默契。隨著任務推進，他們揭開「公司」背後隱藏的真正陰謀……",
+  "rating" : "輔15+",
+  "imagePath" : "images/movie9.jpg",
+  "actors" : "克里斯多夫沃茲, 庫柏霍夫曼",
+  "director" : "賽門魏斯",
+  "hallTypes" : [ "Hall A", "Hall B" ],
+  "showtimes" : [ {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "10:00",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "14:40",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "22:25",
+    "seats" : null
+  } ]
+}, {
+  "id" : "M010",
+  "title" : "禁夜屍",
+  "runtime" : 92,
+  "introduction" : "蘿賽李奧（艾梅勞德杜比亞 飾）是一位華爾街股票經紀人，因祖母突然過世前往公寓處理後事。暴風雪使她不得不與祖母遺體共度一夜，卻遭遇邪惡力量附身，成為家族世代詛咒的目標，陷入驚悚危機。",
+  "rating" : "輔15+",
+  "imagePath" : "images/movie10.jpg",
+  "actors" : "艾梅勞德杜比亞",
+  "director" : "費利佩巴爾加斯",
+  "hallTypes" : [ "Hall A", "Hall B" ],
+  "showtimes" : [ {
+    "showtimeId" : null,
+    "hallType" : "Hall A",
+    "date" : "2025/06/10",
+    "time" : "16:00",
+    "seats" : null
+  }, {
+    "showtimeId" : null,
+    "hallType" : "Hall B",
+    "date" : "2025/06/10",
+    "time" : "20:35",
+    "seats" : null
+  } ]
+} ]

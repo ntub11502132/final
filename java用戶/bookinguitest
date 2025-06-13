@@ -1,0 +1,461 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors; // For stream operations
+
+public class BookingUI extends JPanel {
+
+    private MainForm parentFrame;
+    private String currentMovieId;
+
+    // 左側電影資訊 Label
+    private JLabel movieNameLabel;
+    private JLabel movieDurationLabel;
+    private JLabel movieGenreLabel;
+    private JLabel movieRatingLabel;
+    private JLabel movieActorsLabel;
+    private JLabel movieDirectorLabel;
+    private JTextArea movieSynopsisArea;
+
+    // 中間選票區域
+    private ButtonGroup hallTypeGroup;
+    private ButtonGroup dateGroup;
+    private ButtonGroup timeGroup;
+    private JPanel hallTypeButtonsPanel;
+    private JPanel dateButtonsPanel;
+    private JPanel timeButtonsPanel;
+
+    // 右側座位區域
+    private JPanel seatMapPanel;
+    private Map<String, JToggleButton> seatButtons;
+    private List<String> selectedSeats;
+
+    // 當前選中的資訊
+    private String selectedHallType = null;
+    private String selectedDate = null;
+    private String selectedTime = null;
+    private String selectedShowtimeId = null; // ShowtimeID 現在是 String
+
+    public BookingUI(MainForm parentFrame) {
+        this.parentFrame = parentFrame;
+        setLayout(new BorderLayout(20, 10));
+        setBackground(new Color(0x95B0D0));
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        selectedSeats = new ArrayList<>();
+
+        // 左側：電影詳細資訊
+        JPanel movieDetailPanel = new JPanel();
+        movieDetailPanel.setLayout(new GridBagLayout());
+        movieDetailPanel.setBackground(new Color(0x95B0D0));
+        movieDetailPanel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.BLACK), "電影資訊", 0, 0, new Font("Microsoft JhengHei", Font.BOLD, 18)));
+
+        Font labelFont = new Font("Microsoft JhengHei", Font.BOLD, 16);
+        Font valueFont = new Font("Microsoft JhengHei", Font.PLAIN, 16);
+
+        int row = 0;
+        movieDetailPanel.add(new JLabel("電影名稱:"), getGBC(0, row, labelFont)); movieNameLabel = new JLabel(); movieNameLabel.setFont(valueFont); movieDetailPanel.add(movieNameLabel, getGBC(1, row++, valueFont));
+        movieDetailPanel.add(new JLabel("片長:"), getGBC(0, row, labelFont)); movieDurationLabel = new JLabel(); movieDurationLabel.setFont(valueFont); movieDetailPanel.add(movieDurationLabel, getGBC(1, row++, valueFont));
+        movieDetailPanel.add(new JLabel("類型:"), getGBC(0, row, labelFont)); movieGenreLabel = new JLabel(); movieGenreLabel.setFont(valueFont); movieDetailPanel.add(movieGenreLabel, getGBC(1, row++, valueFont));
+        movieDetailPanel.add(new JLabel("分級:"), getGBC(0, row, labelFont)); movieRatingLabel = new JLabel(); movieRatingLabel.setFont(valueFont); movieDetailPanel.add(movieRatingLabel, getGBC(1, row++, valueFont));
+        movieDetailPanel.add(new JLabel("演員:"), getGBC(0, row, labelFont)); movieActorsLabel = new JLabel(); movieActorsLabel.setFont(valueFont); movieDetailPanel.add(movieActorsLabel, getGBC(1, row++, valueFont));
+        movieDetailPanel.add(new JLabel("導演:"), getGBC(0, row, labelFont)); movieDirectorLabel = new JLabel(); movieDirectorLabel.setFont(valueFont); movieDetailPanel.add(movieDirectorLabel, getGBC(1, row++, valueFont));
+
+        JLabel synopsisTitle = new JLabel("簡介:");
+        synopsisTitle.setFont(labelFont);
+        GridBagConstraints gbcSynopsis = new GridBagConstraints();
+        gbcSynopsis.gridx = 0;
+        gbcSynopsis.gridy = row;
+        gbcSynopsis.gridwidth = 2;
+        gbcSynopsis.anchor = GridBagConstraints.WEST;
+        gbcSynopsis.insets = new Insets(5, 5, 5, 5);
+        movieDetailPanel.add(synopsisTitle, gbcSynopsis);
+        row++;
+
+        movieSynopsisArea = new JTextArea(5, 20);
+        movieSynopsisArea.setFont(valueFont);
+        movieSynopsisArea.setLineWrap(true);
+        movieSynopsisArea.setWrapStyleWord(true);
+        movieSynopsisArea.setEditable(false);
+        movieSynopsisArea.setBackground(new Color(0x95B0D0));
+        JScrollPane synopsisScrollPane = new JScrollPane(movieSynopsisArea);
+        synopsisScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        synopsisScrollPane.setBackground(new Color(0x95B0D0));
+
+        gbcSynopsis.gridx = 0;
+        gbcSynopsis.gridy = row;
+        gbcSynopsis.gridwidth = 2;
+        gbcSynopsis.fill = GridBagConstraints.BOTH;
+        gbcSynopsis.weightx = 1.0;
+        gbcSynopsis.weighty = 1.0;
+        movieDetailPanel.add(synopsisScrollPane, gbcSynopsis);
+
+        add(movieDetailPanel, BorderLayout.WEST);
+
+        // 中間：票種/日期/時間選擇
+        JPanel selectionPanel = new JPanel();
+        selectionPanel.setLayout(new GridBagLayout());
+        selectionPanel.setBackground(new Color(0x95B0D0));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        Font buttonFont = new Font("Microsoft JhengHei", Font.PLAIN, 14);
+
+        // 票種/廳別選擇
+        hallTypeButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        hallTypeButtonsPanel.setBackground(new Color(0x95B0D0));
+        hallTypeGroup = new ButtonGroup();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        selectionPanel.add(hallTypeButtonsPanel, gbc);
+
+        // 日期選擇
+        dateButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        dateButtonsPanel.setBackground(new Color(0x95B0D0));
+        dateGroup = new ButtonGroup();
+        gbc.gridy = 1;
+        selectionPanel.add(dateButtonsPanel, gbc);
+
+        // 時間選擇
+        timeButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        timeButtonsPanel.setBackground(new Color(0x95B0D0));
+        timeGroup = new ButtonGroup();
+        gbc.gridy = 2;
+        selectionPanel.add(timeButtonsPanel, gbc);
+
+        add(selectionPanel, BorderLayout.CENTER);
+
+
+        // 右側：座位選擇區和螢幕提示
+        JPanel seatBookingPanel = new JPanel(new BorderLayout(10, 10));
+        seatBookingPanel.setBackground(new Color(0x95B0D0));
+        seatBookingPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
+        JLabel screenLabel = new JLabel("螢幕", SwingConstants.CENTER);
+        screenLabel.setFont(new Font("Microsoft JhengHei", Font.BOLD, 24));
+        screenLabel.setBackground(Color.DARK_GRAY);
+        screenLabel.setForeground(Color.WHITE);
+        screenLabel.setOpaque(true);
+        screenLabel.setPreferredSize(new Dimension(seatBookingPanel.getWidth(), 50));
+        seatBookingPanel.add(screenLabel, BorderLayout.NORTH);
+
+        seatMapPanel = new JPanel(new GridBagLayout());
+        seatMapPanel.setBackground(new Color(0x95B0D0));
+        JScrollPane seatScrollPane = new JScrollPane(seatMapPanel);
+        seatScrollPane.setBorder(null);
+        seatScrollPane.getViewport().setBackground(new Color(0x95B0D0));
+        seatBookingPanel.add(seatScrollPane, BorderLayout.CENTER);
+
+        JButton confirmButton = new JButton("確認");
+        confirmButton.setFont(new Font("Microsoft JhengHei", Font.BOLD, 20));
+        confirmButton.setPreferredSize(new Dimension(150, 50));
+        confirmButton.addActionListener(e -> confirmBooking());
+        
+        JPanel confirmButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        confirmButtonPanel.setBackground(new Color(0x95B0D0));
+        confirmButtonPanel.add(confirmButton);
+        seatBookingPanel.add(confirmButtonPanel, BorderLayout.SOUTH);
+
+        add(seatBookingPanel, BorderLayout.EAST);
+
+        setEnabledForButtons(dateButtonsPanel, false);
+        setEnabledForButtons(timeButtonsPanel, false);
+        clearSeatMap();
+    }
+
+    private GridBagConstraints getGBC(int x, int y, Font font) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = x;
+        gbc.gridy = y;
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+        return gbc;
+    }
+
+    public void loadMovie(String movieId) {
+        this.currentMovieId = movieId;
+        // 清除之前的選擇
+        selectedHallType = null;
+        selectedDate = null;
+        selectedTime = null;
+        selectedShowtimeId = null; // 重置為 null
+        selectedSeats.clear();
+        clearSeatMap();
+        setEnabledForButtons(dateButtonsPanel, false);
+        setEnabledForButtons(timeButtonsPanel, false);
+
+        // 從 JsonDataManager 獲取電影詳細資訊
+        Movie movie = JsonDataManager.getMovieById(movieId);
+        if (movie != null) {
+            movieNameLabel.setText(movie.getTitle());
+            movieDurationLabel.setText(movie.getRuntime() + " 分鐘");
+            movieGenreLabel.setText("未知類型"); // JSON中可新增此欄位
+            movieRatingLabel.setText(movie.getRating());
+            movieActorsLabel.setText(movie.getActors());
+            movieDirectorLabel.setText(movie.getDirector());
+            movieSynopsisArea.setText(movie.getIntroduction());
+
+            // 載入票種（廳別）按鈕
+            loadHallTypeButtons(JsonDataManager.getAvailableHallTypes(movieId));
+        } else {
+            movieNameLabel.setText("N/A");
+            movieDurationLabel.setText("N/A");
+            movieGenreLabel.setText("N/A");
+            movieRatingLabel.setText("N/A");
+            movieActorsLabel.setText("N/A");
+            movieDirectorLabel.setText("N/A");
+            movieSynopsisArea.setText("找不到電影資訊。");
+            hallTypeButtonsPanel.removeAll();
+            hallTypeButtonsPanel.revalidate();
+            hallTypeButtonsPanel.repaint();
+        }
+    }
+
+    private void loadHallTypeButtons(List<String> hallTypes) {
+        hallTypeButtonsPanel.removeAll();
+        hallTypeGroup = new ButtonGroup();
+
+        for (String hallType : hallTypes) {
+            JToggleButton button = createToggleButton(hallType);
+            button.addActionListener(e -> {
+                selectedHallType = button.getText();
+                selectedDate = null;
+                selectedTime = null;
+                selectedShowtimeId = null;
+                selectedSeats.clear();
+                clearSeatMap();
+                loadDateButtons(currentMovieId, selectedHallType);
+                setEnabledForButtons(dateButtonsPanel, true);
+                setEnabledForButtons(timeButtonsPanel, false);
+            });
+            hallTypeGroup.add(button);
+            hallTypeButtonsPanel.add(button);
+        }
+        hallTypeButtonsPanel.revalidate();
+        hallTypeButtonsPanel.repaint();
+    }
+
+    private void loadDateButtons(String movieId, String hallType) {
+        dateButtonsPanel.removeAll();
+        dateGroup = new ButtonGroup();
+
+        List<String> dates = JsonDataManager.getAvailableDates(movieId, hallType);
+        for (String date : dates) {
+            JToggleButton button = createToggleButton(date);
+            button.addActionListener(e -> {
+                selectedDate = button.getText();
+                selectedTime = null;
+                selectedShowtimeId = null;
+                selectedSeats.clear();
+                clearSeatMap();
+                loadTimeButtons(currentMovieId, selectedHallType, selectedDate);
+                setEnabledForButtons(timeButtonsPanel, true);
+            });
+            dateGroup.add(button);
+            dateButtonsPanel.add(button);
+        }
+        dateButtonsPanel.revalidate();
+        dateButtonsPanel.repaint();
+    }
+
+    private void loadTimeButtons(String movieId, String hallType, String date) {
+        timeButtonsPanel.removeAll();
+        timeGroup = new ButtonGroup();
+
+        List<String> times = JsonDataManager.getAvailableTimes(movieId, hallType, date);
+        for (String time : times) {
+            JToggleButton button = createToggleButton(time);
+            button.addActionListener(e -> {
+                selectedTime = button.getText();
+                Showtime showtime = JsonDataManager.getShowtimeDetails(currentMovieId, selectedHallType, selectedDate, selectedTime);
+                if (showtime != null) {
+                    selectedShowtimeId = showtime.getShowtimeId();
+                    loadSeatMap(showtime);
+                    selectedSeats.clear();
+                } else {
+                    clearSeatMap();
+                    JOptionPane.showMessageDialog(this, "找不到該場次的詳細資訊。", "錯誤", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+            timeGroup.add(button);
+            timeButtonsPanel.add(button);
+        }
+        timeButtonsPanel.revalidate();
+        timeButtonsPanel.repaint();
+    }
+
+    private JToggleButton createToggleButton(String text) {
+        JToggleButton button = new JToggleButton(text);
+        button.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 14));
+        button.setPreferredSize(new Dimension(90, 30));
+        button.setFocusPainted(false);
+
+        button.addActionListener(e -> {
+            if (button.isSelected()) {
+                button.setBackground(new Color(0xAACCFF));
+            } else {
+                button.setBackground(UIManager.getColor("ToggleButton.background"));
+            }
+        });
+        return button;
+    }
+    
+    private void setEnabledForButtons(JPanel panel, boolean enabled) {
+        for (Component comp : panel.getComponents()) {
+            if (comp instanceof JToggleButton) {
+                ((JToggleButton) comp).setEnabled(enabled);
+            }
+        }
+    }
+
+
+    private void loadSeatMap(Showtime showtime) {
+        clearSeatMap();
+        seatButtons = new HashMap<>();
+
+        // 分析座位列表確定行列數
+        int maxRow = 0;
+        int maxCol = 0;
+        // 如果場次沒有座位信息，則預設生成一個
+        List<Seat> seatsToDisplay = showtime.getSeats();
+        if (seatsToDisplay == null || seatsToDisplay.isEmpty()) {
+            // 可以根據廳別類型或預設值生成座位
+            // 這裡為了演示，暫時生成一個小的座位圖
+            seatsToDisplay = JsonDataManager.generateSeats(5, 10);
+            System.out.println("Warning: Showtime " + showtime.getShowtimeId() + " has no seats, generating dummy seats.");
+        }
+
+
+        for (Seat seat : seatsToDisplay) {
+            char rowChar = seat.getNumber().charAt(0);
+            // 處理座位號碼可能不包含數字的情況，但我們預期是 "A1", "B2" 這種
+            int colNum = 0;
+            try {
+                colNum = Integer.parseInt(seat.getNumber().substring(1));
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid seat number format: " + seat.getNumber());
+                continue; // 跳過無效座位
+            }
+            maxRow = Math.max(maxRow, rowChar - 'A' + 1);
+            maxCol = Math.max(maxCol, colNum);
+        }
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(3, 3, 3, 3);
+        gbc.fill = GridBagConstraints.BOTH;
+
+        // 添加列標籤 (數字)
+        for (int col = 1; col <= maxCol; col++) {
+            JLabel colLabel = new JLabel(String.valueOf(col), SwingConstants.CENTER);
+            colLabel.setFont(new Font("Arial", Font.BOLD, 12));
+            gbc.gridx = col;
+            gbc.gridy = 0;
+            seatMapPanel.add(colLabel, gbc);
+        }
+
+        // 添加行標籤 (字母) 和座位按鈕
+        for (int row = 0; row < maxRow; row++) {
+            char rowChar = (char) ('A' + row);
+            JLabel rowLabel = new JLabel(String.valueOf(rowChar), SwingConstants.CENTER);
+            rowLabel.setFont(new Font("Arial", Font.BOLD, 12));
+            gbc.gridx = 0;
+            gbc.gridy = row + 1;
+            seatMapPanel.add(rowLabel, gbc);
+
+            for (int col = 1; col <= maxCol; col++) {
+                String seatName = String.valueOf(rowChar) + col;
+                JToggleButton seatButton = new JToggleButton(String.valueOf(col));
+                seatButton.setFont(new Font("Arial", Font.PLAIN, 12));
+                seatButton.setPreferredSize(new Dimension(40, 30));
+
+                Seat currentSeat = seatsToDisplay.stream()
+                                                .filter(s -> s.getNumber().equals(seatName))
+                                                .findFirst()
+                                                .orElse(null);
+
+                if (currentSeat != null && currentSeat.isOccupied()) {
+                    seatButton.setBackground(Color.RED);
+                    seatButton.setEnabled(false);
+                } else {
+                    seatButton.setBackground(Color.LIGHT_GRAY);
+                    seatButton.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (seatButton.isSelected()) {
+                                seatButton.setBackground(Color.GREEN);
+                                selectedSeats.add(seatName);
+                            } else {
+                                seatButton.setBackground(Color.LIGHT_GRAY);
+                                selectedSeats.remove(seatName);
+                            }
+                        }
+                    });
+                }
+                seatButtons.put(seatName, seatButton);
+
+                gbc.gridx = col;
+                gbc.gridy = row + 1;
+                seatMapPanel.add(seatButton, gbc);
+            }
+        }
+        seatMapPanel.revalidate();
+        seatMapPanel.repaint();
+    }
+    
+    private void clearSeatMap() {
+        seatMapPanel.removeAll();
+        seatMapPanel.revalidate();
+        seatMapPanel.repaint();
+    }
+
+
+    private void confirmBooking() {
+        if (selectedHallType == null || selectedDate == null || selectedTime == null) {
+            JOptionPane.showMessageDialog(this, "請選擇票種、日期和時間！", "訂票錯誤", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (selectedSeats.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "請選擇至少一個座位！", "訂票錯誤", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        if (selectedShowtimeId == null) {
+             JOptionPane.showMessageDialog(this, "場次資訊不完整，請重新選擇！", "訂票錯誤", JOptionPane.WARNING_MESSAGE);
+             return;
+        }
+
+        String confirmMsg = String.format(
+                "您選擇了:\n電影: %s\n廳別: %s\n日期: %s\n時間: %s\n座位: %s\n\n確認訂票嗎？",
+                movieNameLabel.getText(), selectedHallType, selectedDate, selectedTime, String.join(", ", selectedSeats)
+        );
+
+        int confirm = JOptionPane.showConfirmDialog(this, confirmMsg, "確認訂票", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // 更新 JSON 檔案中的座位狀態
+            boolean success = JsonDataManager.updateSeatOccupancy(selectedShowtimeId, selectedSeats, true);
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, "訂票成功！您的訂單已提交。\n選擇的座位: " + String.join(", ", selectedSeats), "訂票成功", JOptionPane.INFORMATION_MESSAGE);
+                // 刷新座位圖以顯示新佔用的座位
+                Showtime currentShowtime = JsonDataManager.getShowtimeDetails(currentMovieId, selectedHallType, selectedDate, selectedTime);
+                if (currentShowtime != null) {
+                    loadSeatMap(currentShowtime);
+                    selectedSeats.clear();
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "訂票失敗，請重試！", "訂票錯誤", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+}

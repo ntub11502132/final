@@ -1,0 +1,16 @@
+[ {
+  "account" : "1234@gmail.com",
+  "password" : "$2a$10$rBZStv2Khlz91vTRarIqzOVe..EF.d8ln4iiofI4/Moi6Upqich8u",
+  "dateOfBirth" : "2004-02-22",
+  "phoneNumber" : "0911111111"
+}, {
+  "account" : "111@gmail.com",
+  "password" : "$2a$10$tkasb9PxdJJCJYNEXLJDo.8RGC1hjFfOBry55LCyC0wvU4lojr0gS",
+  "dateOfBirth" : "2000-02-21",
+  "phoneNumber" : "0921254789"
+}, {
+  "account" : "asda@gmail.com",
+  "password" : "$2a$12$Aq3rBhoCyQE/afz15QbxCOY0YeqCb7ILK675tu14cgrRuK/VTpoaa",
+  "dateOfBirth" : "2000-01-20",
+  "phoneNumber" : "0988888888"
+} ]

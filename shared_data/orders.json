@@ -1,0 +1,141 @@
+[ {
+  "orderId" : "cdb727c9-3abe-4c83-9477-72db2b2af6f1",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "取精急轉彎",
+  "showtime" : "取精急轉彎 - 2025/06/15 19:00 (Hall A)",
+  "hallName" : "Hall A",
+  "seats" : [ "A8", "A7" ],
+  "bookingTime" : "2025-06-10T11:41:59.0081001",
+  "orderStatus" : "已付款",
+  "totalAmount" : 600.0
+}, {
+  "orderId" : "7dcd3a88-d522-49a2-b63c-44e2a4d11dab",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "取精急轉彎",
+  "showtime" : "取精急轉彎 - 2025/06/15 19:00 (Hall A)",
+  "hallName" : "Hall A",
+  "seats" : [ "E8" ],
+  "bookingTime" : "2025-06-10T11:46:40.6619476",
+  "orderStatus" : "待付款",
+  "totalAmount" : 300.0
+}, {
+  "orderId" : "cb3175f4-8562-4ccc-b260-4e885614fdcc",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "有病才會喜歡你",
+  "showtime" : "有病才會喜歡你 - 2025/06/15 19:00 (Hall A)",
+  "hallName" : "Hall A",
+  "seats" : [ "B9", "B8", "B10" ],
+  "bookingTime" : "2025-06-10T11:46:52.565939",
+  "orderStatus" : "已付款",
+  "totalAmount" : 900.0
+}, {
+  "orderId" : "eafa1b75-6df0-4ce4-bc9e-7cf16d0c5d25",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "取精急轉彎",
+  "showtime" : "取精急轉彎 - 2025/06/15 19:00 (Hall A)",
+  "hallName" : "Hall A",
+  "seats" : [ "C10", "C9" ],
+  "bookingTime" : "2025-06-10T11:53:48.2058731",
+  "orderStatus" : "已付款",
+  "totalAmount" : 600.0
+}, {
+  "orderId" : "30236373-31b5-4779-b949-d4c5188f95b8",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "雷霆特攻隊",
+  "showtime" : "雷霆特攻隊 - 2025/06/10 15:40 (Hall B)",
+  "hallName" : "Hall B",
+  "seats" : [ "G24", "G23" ],
+  "bookingTime" : "2025-06-10T12:07:32.2460543",
+  "orderStatus" : "已付款",
+  "totalAmount" : 600.0
+}, {
+  "orderId" : "33fa6699-a04d-4f0f-ba85-baf6c419290f",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "會計師2",
+  "showtime" : "會計師2 - 2025/06/10 12:00 (Hall B)",
+  "hallName" : "Hall B",
+  "seats" : [ "H10" ],
+  "bookingTime" : "2025-06-10T12:30:27.4297053",
+  "orderStatus" : "待付款",
+  "totalAmount" : 300.0
+}, {
+  "orderId" : "d519dd2b-bcf2-47e8-b6e6-ffe1c48c2ca2",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "有病才會喜歡你",
+  "showtime" : "有病才會喜歡你 - 2025/06/10 15:00 (Hall A)",
+  "hallName" : "Hall A",
+  "seats" : [ "B12" ],
+  "bookingTime" : "2025-06-10T12:30:42.7595068",
+  "orderStatus" : "已付款",
+  "totalAmount" : 300.0
+}, {
+  "orderId" : "2b744ca7-61f4-40b0-af0b-d08c6a33096a",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "取精急轉彎",
+  "showtime" : "2025/06/10 12:00 (Hall B)",
+  "hallName" : "Hall B",
+  "seats" : [ "A22", "A21" ],
+  "bookingTime" : "2025-06-10T12:33:22.2253725",
+  "orderStatus" : "已取消",
+  "totalAmount" : 600.0
+}, {
+  "orderId" : "c8b9e0c3-c1ea-4ace-b261-5a172df29b8f",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "有病才會喜歡你",
+  "showtime" : "2025/06/10 21:15 (Hall A)",
+  "hallName" : "Hall A",
+  "seats" : [ "E9" ],
+  "bookingTime" : "2025-06-10T12:34:08.5422489",
+  "orderStatus" : "已退票",
+  "totalAmount" : 300.0
+}, {
+  "orderId" : "63dc046f-5655-4124-a3fc-2d4d0e1e92e6",
+  "username" : "111@gmail.com",
+  "movieTitle" : "取精急轉彎",
+  "showtime" : "2025/06/10 22:15 (Hall B)",
+  "hallName" : "Hall B",
+  "seats" : [ "B20", "B21", "C20" ],
+  "bookingTime" : "2025-06-10T13:45:41.6786509",
+  "orderStatus" : "已取消",
+  "totalAmount" : 900.0
+}, {
+  "orderId" : "88f93b97-bab9-4d6f-a9b9-4e7d02acb081",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "雷霆特攻隊",
+  "showtime" : "2025/06/10 10:00 (Hall A)",
+  "hallName" : "Hall A",
+  "seats" : [ "E8", "E7", "E9" ],
+  "bookingTime" : "2025-06-10T15:28:01.9403936",
+  "orderStatus" : "已取消",
+  "totalAmount" : 900.0
+}, {
+  "orderId" : "1be81ff1-94ca-40c3-9d3c-61cafef5e757",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "會計師2",
+  "showtime" : "2025/06/10 12:00 (Hall B)",
+  "hallName" : "Hall B",
+  "seats" : [ "G15", "G16", "F16", "F17", "G17", "F15" ],
+  "bookingTime" : "2025-06-10T15:28:40.5841574",
+  "orderStatus" : "已付款",
+  "totalAmount" : 1800.0
+}, {
+  "orderId" : "ffa2188a-d767-4f4c-a3b3-fedb22a91277",
+  "username" : "1234@gmail.com",
+  "movieTitle" : "取精急轉彎",
+  "showtime" : "2025/06/10 22:15 (Hall B)",
+  "hallName" : "Hall B",
+  "seats" : [ "C20", "C19" ],
+  "bookingTime" : "2025-06-10T15:29:45.8288172",
+  "orderStatus" : "已付款",
+  "totalAmount" : 600.0
+}, {
+  "orderId" : "b8ecc812-5f7e-4955-9509-560d5981b5ee",
+  "username" : "111@gmail.com",
+  "movieTitle" : "取精急轉彎",
+  "showtime" : "2025/06/10 22:15 (Hall B)",
+  "hallName" : "Hall B",
+  "seats" : [ "A25", "A24" ],
+  "bookingTime" : "2025-06-10T15:31:39.0418755",
+  "orderStatus" : "已付款",
+  "totalAmount" : 600.0
+} ]

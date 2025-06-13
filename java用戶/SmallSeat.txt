@@ -1,0 +1,39 @@
+public void SeatSet()
+{
+    int seatNumber = 0;
+    for (int i = 0; i < Rows; i++)
+    {
+        if (i != 4 && i != 13)
+        {
+            seatNumber++;
+            for (int j = 0; j < Columns; j++)
+            {
+                Button seat = new Button();
+                seat.Size = new Size(Width, Height);
+                seat.UseVisualStyleBackColor = true;
+                seat.Location = new Point(
+                    20 + i * (Width + horizontalSpacing),
+                    80 + j * (Height + verticalSpacing));
+                seat.Text = $"{seatNumber}";
+                seat.Name = $"btnSeat_{seatNumber}";
+                seat.Click += seat_Click; 
+                //seatButtons[i, j] = seat;
+                panel_seat.Controls.Add(seat);
+            }
+        }
+        else
+        {
+            for(int j = 0; j < Columns; j++)
+            {
+                Label label = new Label();
+                label.Size = new Size(Width, Height);
+                label.Location = new Point(
+                    20 + i * (Width + horizontalSpacing),
+                    85 + j * (Height + verticalSpacing));
+                label.Text = $"{(char)('A' + j)}";
+                label.TextAlign = ContentAlignment.TopCenter;
+                panel_seat.Controls.Add(label);
+            }
+        }
+    }
+}
